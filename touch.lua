@@ -63,7 +63,7 @@ end
 
 -- if the mouse is being dragged after clicking, update the values of force or angle
 -- uses distance from initial click for smoothly
-function love.update(dt)
+function mouse_update(dt)
     if dragging then
 
         mouseXcurrent = love.mouse.getX()

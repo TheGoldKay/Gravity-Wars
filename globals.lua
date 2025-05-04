@@ -36,6 +36,12 @@ function setVariables()
     -- set number of Planets
     numOfPlanets = 7
 
+    -- mouse iterations on or off
+    mouseInteraction = false 
+
+    -- angle rate of change (velocity) -> dt * angleVel + actualAngle = newAngle
+    angleVel = 30
+
     allPlanets = {} -- each planet will have `mass`, `r`, `x`, `y`
 
     allBullets = {} -- list of bullets, each will have `x`, `y`, and `vx`, `vy` (velocity x & y components)
