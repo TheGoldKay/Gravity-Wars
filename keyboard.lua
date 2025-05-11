@@ -15,9 +15,6 @@ function love.keypressed(key)
 
     if key == 'up' then
         keyUp = true
-
-        player1.force = player1.force * 1.01
-
     end
 
     if key == 'down' then
@@ -32,8 +29,12 @@ function love.keypressed(key)
         newGame()
     end
 
-    if key == 'space' then
+    if key == 'space' or key == 'kp0'then
         playerPressedShootButton()
+    end
+
+    if key == 's' then 
+        split(allBullets[1].x, allBullets[1].y)
     end
 
     if key == 'escape' then
@@ -43,10 +44,23 @@ function love.keypressed(key)
 end
 
 function love.keyreleased(key)
-
     keyRight = false
     keyLeft = false
     keyUp = false
     keyDown = false
+end
 
+function love.update(dt)
+    playerN = currentPlayer()
+    if keyRight then
+        playerN.angle = playerN.angle + dt * angleVel
+    elseif keyLeft then
+        playerN.angle = playerN.angle - dt * angleVel
+    end
+
+    if keyUp then
+        playerN.force = playerN.force + dt  
+    elseif keyDown then
+        playerN.force = playerN.force - dt 
+    end
 end

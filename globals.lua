@@ -2,11 +2,12 @@
 -- Code setting up all the global variables to be used
 ----------------------------------------------------------------------------------------------------
 function loadExternalAssets()
-
     ss1 = love.graphics.newImage("assets/ss1.png")
     ss2 = love.graphics.newImage("assets/ss2.png")
-    pixelFont = love.graphics.newFont("assets/basis33.ttf", 16)
-
+    pixelFont = love.graphics.newFont("assets/basis33.ttf", 19)
+    explosion_sound = love.audio.newSource("assets/large-underwater-explosion-190270.mp3", "static")
+    explosion_sound:setPitch(2) -- twice as fast
+    love.audio.setVolume(2) -- twice as loud
 end
 
 function setVariables()
@@ -15,8 +16,8 @@ function setVariables()
 
     dragCursor = love.mouse.getSystemCursor("sizewe")
 
-    WIDTH = 1000
-    HEIGHT = 800
+    WIDTH = 800
+    HEIGHT = 600
 
     -- Mouse click interactions
     dragging = false
@@ -28,7 +29,7 @@ function setVariables()
     -- colorMode = 1
 
     -- bullet type (should be changeable by player)
-    bulType = 1
+    --bulType = 1
 
     -- set number of bullets
     numOfBullets = 10
@@ -36,11 +37,10 @@ function setVariables()
     -- set number of Planets
     numOfPlanets = 7
 
-    -- mouse iterations on or off
-    mouseInteraction = false 
-
     -- angle rate of change (velocity) -> dt * angleVel + actualAngle = newAngle
     angleVel = 30
+
+    mouseInteraction = false -- if true, use mouse to drag the force and angle
 
     allPlanets = {} -- each planet will have `mass`, `r`, `x`, `y`
 

@@ -2,6 +2,7 @@
 -- Code related to creating new game, planets, collision check, and draw shot
 ----------------------------------------------------------------------------------------------------
 function newGame()
+    resetBullets()
 
     setInitialPositions()
 
@@ -25,6 +26,12 @@ function newGame()
 
 end
 
+function resetBullets()
+    for i, v in pairs(allBullets) do
+        resetShot(i)
+    end
+end
+
 -- returns `player1` or `player2` table (object) depending on whose turn it is
 function currentPlayer()
 
@@ -38,59 +45,71 @@ end
 -- Randomize placement of planets & ships
 -- check for overlap, retry if check fails
 function setInitialPositions()
+    repeat 
+        print('randomizing planets attempt')
 
-    print('randomizing planets attempt')
+        allPlanets = {} -- reset whatever we had before first
 
-    allPlanets = {} -- reset whatever we had before first
+        -- include parameters for max and min planet locations
 
-    -- include parameters for max and min planet locations
+        -- TODO: experiment with mass
+        -- having the mass depend on radius is less fun - small planets stop mattering
+        -- mass = (math.pow(allPlanets[i].r,3)/25) -- MASS depends on radius^3 *** this affects speed of drawing
 
-    -- TODO: experiment with mass
-    -- having the mass depend on radius is less fun - small planets stop mattering
-    -- mass = (math.pow(allPlanets[i].r,3)/25) -- MASS depends on radius^3 *** this affects speed of drawing
+        for i = 1, numOfPlanets do
+            allPlanets[i] = {
+                x = math.random(100, WIDTH - 100),
+                y = math.random(150, HEIGHT - 250),
+                r = math.random(15, 50),
+                mass = math.random(10, 50) * 10,
+                id = i
+            }
+        end
 
-    for i = 1, numOfPlanets do
-        allPlanets[i] = {
-            x = math.random(100, WIDTH - 100),
-            y = math.random(150, HEIGHT - 250),
-            r = math.random(15, 50),
-            mass = math.random(10, 50) * 10
-        }
-    end
+        -- reposition ships
+        player1.x = math.random(200, WIDTH / 2 - 100)
+        player1.y = math.random(200, HEIGHT - 200)
+        player2.x = math.random(WIDTH / 2 + 100, WIDTH - 200)
+        player2.y = math.random(200, HEIGHT - 200)
+        
+    until isValidPosition()
+end
 
-    -- reposition ships
-    player1.x = math.random(200, WIDTH / 2 - 100)
-    player1.y = math.random(200, HEIGHT - 200)
-    player2.x = math.random(WIDTH / 2 + 100, WIDTH - 200)
-    player2.y = math.random(200, HEIGHT - 200)
-
+function isValidPosition()
     -- TODO - compute distance with square roots - not just x & y distance
     -- check for planet overlap
     -- check for ship overlapping with planet too
     -- space them out by 50 px at least
     for i = 1, numOfPlanets do
         for j = 1, numOfPlanets do
-            if allPlanets[i].x == allPlanets[j].x and allPlanets[i].y ==
-                allPlanets[j].y then
-                -- do nothing
-            elseif math.abs(allPlanets[i].x - allPlanets[j].x) < 40 and
-                math.abs(allPlanets[i].y - allPlanets[j].y) < 40 then
-                setInitialPositions()
-                goto done
+            if allPlanets[i].id == allPlanets[j].id then
+                -- do nothing: the same planet
+                goto continue
+            elseif planetDistCheck(allPlanets[i], allPlanets[j]) then
+                -- if any planet touches another planet, try again
+                return false
             elseif math.abs(allPlanets[i].x - player1.x) < 90 and
                 math.abs(allPlanets[i].y - player1.y) < 90 then
-                setInitialPositions()
-                goto done
+                return false
             elseif math.abs(allPlanets[i].x - player2.x) < 90 and
                 math.abs(allPlanets[i].y - player2.y) < 90 then
-                setInitialPositions()
-                goto done
+                return false
             end
+            ::continue::
         end
     end
+    return true
+end 
 
-    ::done::
-
+function planetDistCheck(planet1, planet2)
+    x1, y1, r1 = planet1.x, planet1.y, planet1.r
+    x2, y2, r2 = planet2.x, planet2.y, planet2.r
+    dist = math.pow(math.pow((x1 - x2), 2) + math.pow((y1 - y2), 2), 0.5)
+    if dist < r1 + r2 then
+        return true
+    else
+        return false
+    end
 end
 
 -- check collisions with every shot that is drawn
@@ -209,15 +228,16 @@ function drawShot(b)
 
     -- (1)
     -- set the shot outside if it hits outside the play border
+    --print(b, allBullets[b].x)
     if allBullets[b].x > WIDTH - 10 or allBullets[b].x < 10 or allBullets[b].y >
-        WIDTH - 10 or allBullets[b].y < 10 then
+        HEIGHT - 10 or allBullets[b].y < 10 then
         allBullets[b].x = 0
         allBullets[b].y = 0
     end
 
     -- (3)
     if allBullets[b].x < WIDTH - 10 and allBullets[b].x > 10 and allBullets[b].y <
-        WIDTH - 10 and allBullets[b].y > 10 then
+        HEIGHT - 10 and allBullets[b].y > 10 then
 
         -- array to store forces from each planet to each shot (temp use always)
         fpx = {}
