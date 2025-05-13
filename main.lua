@@ -64,7 +64,7 @@ function love.draw()
 
     -- only draw things if shot is in progress
     if shotInProgress == true then
-        for i = 1, numOfBullets do drawShot(i) end
+        for i = 1, numOfBullets do drawBetterShot(i) end
 
         for i = 1, numOfBullets do collisonCheck(i) end
 
@@ -142,6 +142,7 @@ function love.draw()
 end
 
 function love.update(dt)
+    world:update(dt) 
     if mouseInteraction == true then
         mouse_update(dt)
     else -- keyboard interaction

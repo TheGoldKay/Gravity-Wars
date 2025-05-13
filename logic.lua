@@ -22,6 +22,8 @@ function newGame()
     drawUI()
     love.graphics.setCanvas()
 
+    setPlanets()
+
     print("New Game Started")
 
 end
@@ -293,4 +295,95 @@ function drawShot(b)
 
     end
 
+end
+
+function setPlanets()
+    for i = 1, numOfPlanets do 
+        planet_body = love.physics.newBody(world, allPlanets[i].x, allPlanets[i].y, "static")
+        planet_shape = love.physics.newCircleShape(allPlanets[i].r)
+        planet_fixture = love.physics.newFixture(planet_body, planet_shape, 1)
+        planet_fixture:setDensity(1 / math.pi)
+        planet_body:resetMassData()
+        allPlanets[i].body = planet_body
+        allPlanets[i].shape = planet_shape
+        allPlanets[i].fixture = planet_fixture
+    end
+end
+
+function drawBetterShot(b)
+    -- Variables involved:
+    -- b - bulletIndex `[b]`
+
+    -- (1)
+    -- set the shot outside if it hits outside the play border
+    --print(b, allBullets[b].x)
+    if allBullets[b].x > WIDTH - 10 or allBullets[b].x < 10 or allBullets[b].y >
+        HEIGHT - 10 or allBullets[b].y < 10 then
+        allBullets[b].x = 0
+        allBullets[b].y = 0
+    end
+
+    -- (3)
+    if allBullets[b].x < WIDTH - 10 and allBullets[b].x > 10 and allBullets[b].y <
+        HEIGHT - 10 and allBullets[b].y > 10 then
+
+        -- array to store forces from each planet to each shot (temp use always)
+        fpx = {}
+        fpy = {}
+
+        -- (a)
+        -- calculate force of planet on x1 and y1
+        for i = 1, numOfPlanets do
+            xDiff = allPlanets[i].x - allBullets[b].x
+            yDiff = allPlanets[i].y - allBullets[b].y
+
+            fpx[i] = xDiff /
+                         (math.pow(math.sqrt((xDiff * xDiff) + (yDiff * yDiff)),
+                                   3));
+            fpy[i] = yDiff /
+                         (math.pow(math.sqrt((xDiff * xDiff) + (yDiff * yDiff)),
+                                   3));
+        end
+
+        -- reset velocity -- TEMPORARY VARIABLES
+        vfx = 0
+        vfy = 0
+        full_x_force = 0
+        full_y_force = 0
+
+        -- (b)
+        -- for each planet add all forces multiplied by gravity of each planet
+        for i = 1, numOfPlanets do
+            vfx = vfx + fpx[i] * allPlanets[i].mass
+            full_x_force = full_x_force + fpx[i]
+        end
+
+        for i = 1, numOfPlanets do
+            vfy = vfy + fpy[i] * allPlanets[i].mass
+            full_y_force = full_y_force + fpy[i]
+        end
+
+        -- (c)
+        -- add initial velocity to the final velocity
+        vfx = vfx + allBullets[b].vx
+        vfy = vfy + allBullets[b].vy
+
+        -- set velocity of each bullet to its final velocity
+        --allBullets[b].vx = vfx
+        --allBullets[b].vy = vfy
+        
+        allBullets[b].body:applyForce(full_x_force * 10, full_y_force * 10)
+
+        -- (d)
+        -- Draw shot to canvas
+        love.graphics.setCanvas(canvas)
+        love.graphics.line(allBullets[b].x, allBullets[b].y,
+                           allBullets[b].x + vfx, allBullets[b].y + vfy)
+        love.graphics.setCanvas()
+
+        -- (e)
+        --allBullets[b].x = allBullets[b].x + vfx
+        --allBullets[b].y = allBullets[b].y + vfy
+
+    end
 end
