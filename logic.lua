@@ -63,8 +63,8 @@ function setInitialPositions()
                 x = math.random(100, WIDTH - 100),
                 y = math.random(150, HEIGHT - 250),
                 r = math.random(15, 50),
-                mass = math.random(10, 50) * 10,
-                id = i
+                --mass = math.random(10, 50) * 10,
+                id = i,
             }
         end
 
@@ -307,7 +307,29 @@ function setPlanets()
         allPlanets[i].body = planet_body
         allPlanets[i].shape = planet_shape
         allPlanets[i].fixture = planet_fixture
+        allPlanets[i].fixture:setDensity(1 / math.pi)
+        allPlanets[i].body:resetMassData()
     end
+end
+
+function calculateGravitationalForce(bullet_x, bullet_y, planet_x, planet_y, planet_mass)
+    local G = 667.4 -- Gravitational constant (scaled for gameplay)
+    local dx = planet_x - bullet_x
+    local dy = planet_y - bullet_y
+    local distance = math.sqrt(dx * dx + dy * dy)
+    
+    -- Prevent division by zero and extreme forces at very close distances
+    if distance < 10 then distance = 10 end
+    
+    -- Calculate force magnitude using F = G * (m1 * m2) / r^2
+    -- Note: bullet mass is assumed to be 1 for simplicity
+    local force = G * planet_mass / (distance * distance)
+    
+    -- Calculate force components
+    local force_x = force * (dx / distance)
+    local force_y = force * (dy / distance)
+    
+    return force_x, force_y
 end
 
 function drawBetterShot(b)
@@ -326,6 +348,12 @@ function drawBetterShot(b)
     -- (3)
     if allBullets[b].x < WIDTH - 10 and allBullets[b].x > 10 and allBullets[b].y <
         HEIGHT - 10 and allBullets[b].y > 10 then
+
+        -- Get the current physics body position
+        -- Get current bullet position
+        local bullet_x, bullet_y = allBullets[b].body:getPosition()
+        allBullets[b].x = bullet_x
+        allBullets[b].y = bullet_y
 
         -- array to store forces from each planet to each shot (temp use always)
         fpx = {}
@@ -354,12 +382,12 @@ function drawBetterShot(b)
         -- (b)
         -- for each planet add all forces multiplied by gravity of each planet
         for i = 1, numOfPlanets do
-            vfx = vfx + fpx[i] * allPlanets[i].mass
+            vfx = vfx + fpx[i] * allPlanets[i].body:getMass()
             full_x_force = full_x_force + fpx[i]
         end
 
         for i = 1, numOfPlanets do
-            vfy = vfy + fpy[i] * allPlanets[i].mass
+            vfy = vfy + fpy[i] * allPlanets[i].body:getMass()
             full_y_force = full_y_force + fpy[i]
         end
 
@@ -371,14 +399,37 @@ function drawBetterShot(b)
         -- set velocity of each bullet to its final velocity
         --allBullets[b].vx = vfx
         --allBullets[b].vy = vfy
+
+            -- Calculate and apply gravitational forces from all planets
+        for i = 1, numOfPlanets do
+            local force_x, force_y = calculateGravitationalForce(
+                bullet_x, 
+                bullet_y,
+                allPlanets[i].x,
+                allPlanets[i].y,
+                allPlanets[i].body:getMass()
+            )
+            
+            -- Apply gravitational force to bullet
+            allBullets[b].body:applyForce(force_x, force_y)
+        end
         
-        allBullets[b].body:applyForce(full_x_force * 10, full_y_force * 10)
+        --allBullets[b].body:applyForce(full_x_force * 10, full_y_force * 10)
+
+        -- After applying force, update the bullet's position from physics body
+        allBullets[b].x, allBullets[b].y = allBullets[b].body:getPosition()
 
         -- (d)
         -- Draw shot to canvas
+        --love.graphics.setCanvas(canvas)
+        --love.graphics.line(allBullets[b].x, allBullets[b].y,
+        --                   allBullets[b].x + vfx, allBullets[b].y + vfy)
+        --love.graphics.setCanvas()
+        -- Draw trajectory line
+        local vx, vy = allBullets[b].body:getLinearVelocity()
         love.graphics.setCanvas(canvas)
-        love.graphics.line(allBullets[b].x, allBullets[b].y,
-                           allBullets[b].x + vfx, allBullets[b].y + vfy)
+        love.graphics.line(bullet_x, bullet_y,
+                        bullet_x + vx * 0.1, bullet_y + vy * 0.1)
         love.graphics.setCanvas()
 
         -- (e)

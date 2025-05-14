@@ -29,6 +29,8 @@ function love.load()
     --     love.graphics.setBlendMode("alpha") -- what does this do ?!??
     -- love.graphics.setCanvas()
 
+    world = love.physics.newWorld(0, 0, false) -- physics world
+
     newGame()
 
     bulType = 1

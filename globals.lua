@@ -46,8 +46,6 @@ function setVariables()
 
     allBullets = {} -- list of bullets, each will have `x`, `y`, and `vx`, `vy` (velocity x & y components)
 
-    world = love.physics.newWorld(0, 0, true) -- physics world
-    world:setGravity(0, 0) -- no gravity
 
     bullet_radius = 5 -- radius of the bullet
 

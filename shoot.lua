@@ -8,17 +8,20 @@
 -- t - theta (angle)    additional to player's chosen angle,
 -- bulletIndex - index of the bullet
 function setBulletInitialVelocity(f, t, bulletIndex, angle)
-    angle = angle or false
+    angle = 0
     force = 0
+    local FORCE_SCALE = 100
     if turn == 1 then
         -- preturb it by a bit for jitter so it's not the same
         f = player1.force + f + math.random() * 2
         t = player1.angle + t + math.random() * 10
-        force = player1.force
+        force = f
+        angle = t
     elseif turn == 2 then
         f = player2.force + f + math.random() * 2
         t = player2.angle + t + math.random() * 10
-        force = player2.force
+        force = f
+        angle = t
     end
 
     -- *** REDUCE THE FORCE BY some amount and reduce weight of planets by some amount
@@ -37,12 +40,23 @@ function setBulletInitialVelocity(f, t, bulletIndex, angle)
     allBullets[bulletIndex].body = love.physics.newBody(world, allBullets[bulletIndex].x, allBullets[bulletIndex].y, "dynamic")
     allBullets[bulletIndex].shape = love.physics.newCircleShape(bullet_radius)
     allBullets[bulletIndex].fixture = love.physics.newFixture(allBullets[bulletIndex].body, allBullets[bulletIndex].shape)
-    allBullets[bulletIndex].fixture:setDensity(1 / math.pi)
-    allBullets[bulletIndex].body:resetMassData()
+    --allBullets[bulletIndex].fixture:setDensity(1 / math.pi)
+    --allBullets[bulletIndex].body:resetMassData()
 
-    allBullets[bulletIndex].body:setLinearVelocity(allBullets[bulletIndex].vx * 100, allBullets[bulletIndex].vy * 100)
+    --allBullets[bulletIndex].body:setLinearVelocity(allBullets[bulletIndex].vx * 10, allBullets[bulletIndex].vy * 10)
     --allBullets[bulletIndex].body:setAngle(angle)
-    allBullets[bulletIndex].body:applyForce(force, force)
+    -- Set initial velocity
+    allBullets[bulletIndex].body:setLinearVelocity(
+        allBullets[bulletIndex].vx * FORCE_SCALE, 
+        allBullets[bulletIndex].vy * FORCE_SCALE
+    )
+    
+    -- Set bullet properties
+    allBullets[bulletIndex].fixture:setRestitution(0.8) -- Bouncy collisions
+    allBullets[bulletIndex].fixture:setDensity(1)  -- Mass = 1
+    allBullets[bulletIndex].body:resetMassData()
+    allBullets[bulletIndex].body:setBullet(true)   -- Enable continuous collision detection
+
 end
 
 function resetShot(bulletIndex)

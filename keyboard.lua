@@ -22,7 +22,7 @@ function love.keypressed(key)
     end
 
     if key == 'x' then
-        explode(400, 300)
+        print(allBullets[1].x, allBullets[1].y)
     end
 
     if key == 'n' then
