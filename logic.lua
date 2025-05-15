@@ -63,7 +63,7 @@ function setInitialPositions()
                 x = math.random(100, WIDTH - 100),
                 y = math.random(150, HEIGHT - 250),
                 r = math.random(15, 50),
-                --mass = math.random(10, 50) * 10,
+                mass = math.random(10, 50) * 10,
                 id = i,
             }
         end
@@ -313,7 +313,7 @@ function setPlanets()
 end
 
 function calculateGravitationalForce(bullet_x, bullet_y, planet_x, planet_y, planet_mass)
-    local G = 667.4 -- Gravitational constant (scaled for gameplay)
+    local G = 6674 -- Gravitational constant (scaled for gameplay)
     local dx = planet_x - bullet_x
     local dy = planet_y - bullet_y
     local distance = math.sqrt(dx * dx + dy * dy)
@@ -339,6 +339,8 @@ function drawBetterShot(b)
     -- (1)
     -- set the shot outside if it hits outside the play border
     --print(b, allBullets[b].x)
+    allBullets[b].x = allBullets[b].body:getX()
+    allBullets[b].y = allBullets[b].body:getY()
     if allBullets[b].x > WIDTH - 10 or allBullets[b].x < 10 or allBullets[b].y >
         HEIGHT - 10 or allBullets[b].y < 10 then
         allBullets[b].x = 0
@@ -352,8 +354,6 @@ function drawBetterShot(b)
         -- Get the current physics body position
         -- Get current bullet position
         local bullet_x, bullet_y = allBullets[b].body:getPosition()
-        allBullets[b].x = bullet_x
-        allBullets[b].y = bullet_y
 
         -- array to store forces from each planet to each shot (temp use always)
         fpx = {}
@@ -401,19 +401,21 @@ function drawBetterShot(b)
         --allBullets[b].vy = vfy
 
             -- Calculate and apply gravitational forces from all planets
+        fx, fy = 0, 0
         for i = 1, numOfPlanets do
             local force_x, force_y = calculateGravitationalForce(
                 bullet_x, 
                 bullet_y,
                 allPlanets[i].x,
                 allPlanets[i].y,
-                allPlanets[i].body:getMass()
+                allPlanets[i].body:getMass() * 10
             )
-            
+            fx = fx + force_x
+            fy = fy + force_y
             -- Apply gravitational force to bullet
-            allBullets[b].body:applyForce(force_x, force_y)
+            --allBullets[b].body:applyForce(force_x, force_y)
         end
-        
+        allBullets[b].body:applyLinearImpulse(fx , fy )
         --allBullets[b].body:applyForce(full_x_force * 10, full_y_force * 10)
 
         -- After applying force, update the bullet's position from physics body
