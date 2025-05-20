@@ -77,6 +77,8 @@ function setVariables()
     -- used to end the turn sometime
     shotInProgress = false
 
+    G = 500
+
     -- integer to provide time-out so your bullet doesn't kill you in the first 50 iterations
     -- benign while it's less than 50 iterations of bullet flight, for example (see collision check)
     benign = 0

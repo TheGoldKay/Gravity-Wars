@@ -76,3 +76,15 @@ function drawAngleDiff(playerN, playerOffsetHack)
     end
 
 end
+
+function drawBullet(b)
+    ball = allBullets[b]
+    local x, y = ball.body:getPosition()
+    love.graphics.setColor(1, 1, 1)  -- White ball
+    love.graphics.circle("fill", x, y, ball.radius)
+    
+    -- Draw velocity vector
+    local vx, vy = ball.body:getLinearVelocity()
+    love.graphics.setColor(1, 0, 0)
+    love.graphics.line(x, y, x + vx/5, y + vy/5)
+end

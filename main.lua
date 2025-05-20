@@ -66,7 +66,7 @@ function love.draw()
 
     -- only draw things if shot is in progress
     if shotInProgress == true then
-        for i = 1, numOfBullets do drawBetterShot(i) end
+        for i = 1, numOfBullets do drawBullet(i) end
 
         for i = 1, numOfBullets do collisonCheck(i) end
 
@@ -143,8 +143,32 @@ function love.draw()
 
 end
 
+function update_space(dt)
+    -- Calculate gravitational forces
+    for i, ball in ipairs(allBullets) do
+        local ballX, ballY = ball.body:getPosition()
+        local ballMass = ball.body:getMass()
+
+        for j, planet in ipairs(allPlanets) do
+            local planetX, planetY = planet.body:getPosition()
+            local dx = planetX - ballX
+            local dy = planetY - ballY
+            local distanceSq = dx*dx + dy*dy
+
+            if distanceSq > 0 then
+                local distance = math.sqrt(distanceSq)
+                local force = G * (planet.body:getMass() * ballMass) / distanceSq
+                local fx = (dx / distance) * force
+                local fy = (dy / distance) * force
+                ball.body:applyForce(fx, fy)
+            end
+        end
+    end 
+end
+
 function love.update(dt)
     world:update(dt) 
+    update_space(dt)
     if mouseInteraction == true then
         mouse_update(dt)
     else -- keyboard interaction

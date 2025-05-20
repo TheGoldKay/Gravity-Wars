@@ -38,6 +38,7 @@ function setBulletInitialVelocity(f, t, bulletIndex, angle)
     end
     
     allBullets[bulletIndex].body = love.physics.newBody(world, allBullets[bulletIndex].x, allBullets[bulletIndex].y, "dynamic")
+    allBullets[bulletIndex].radius = bullet_radius
     allBullets[bulletIndex].shape = love.physics.newCircleShape(bullet_radius)
     allBullets[bulletIndex].fixture = love.physics.newFixture(allBullets[bulletIndex].body, allBullets[bulletIndex].shape)
     --allBullets[bulletIndex].fixture:setDensity(1 / math.pi)

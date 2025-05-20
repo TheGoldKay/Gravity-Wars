@@ -308,6 +308,7 @@ function setPlanets()
         allPlanets[i].shape = planet_shape
         allPlanets[i].fixture = planet_fixture
         allPlanets[i].fixture:setDensity(1 / math.pi)
+        allPlanets[i].fixture:setSensor(true)
         allPlanets[i].body:resetMassData()
     end
 end
