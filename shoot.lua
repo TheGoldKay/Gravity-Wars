@@ -54,7 +54,7 @@ function setBulletInitialVelocity(f, t, bulletIndex, angle)
     
     -- Set bullet properties
     allBullets[bulletIndex].fixture:setRestitution(0.8) -- Bouncy collisions
-    allBullets[bulletIndex].fixture:setDensity(1)  -- Mass = 1
+    allBullets[bulletIndex].fixture:setDensity(1 / math.pi)  -- Mass = 1
     allBullets[bulletIndex].body:resetMassData()
     allBullets[bulletIndex].body:setBullet(true)   -- Enable continuous collision detection
 

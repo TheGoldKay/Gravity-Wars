@@ -144,6 +144,7 @@ function love.draw()
 end
 
 function update_space(dt)
+    print(#allBullets)
     -- Calculate gravitational forces
     for i, ball in ipairs(allBullets) do
         local ballX, ballY = ball.body:getPosition()
@@ -155,14 +156,25 @@ function update_space(dt)
             local dy = planetY - ballY
             local distanceSq = dx*dx + dy*dy
 
+            xv = 0
+            yv = 0
             if distanceSq > 0 then
                 local distance = math.sqrt(distanceSq)
-                local force = G * (planet.body:getMass() * ballMass) / distanceSq
-                local fx = (dx / distance) * force
-                local fy = (dy / distance) * force
-                ball.body:applyForce(fx, fy)
+                --local force = G * (planet.body:getMass() * ballMass) / distanceSq
+                --local fx = (dx / distance) * force
+                --local fy = (dy / distance) * force
+                local fx = dx / math.pow(distance, 3)
+                local fy = dy / math.pow(distance, 3)
+                xv = fx * planet.body:getMass() * 100
+                yv = fy * planet.body:getMass() * 100
+                --ball.body:setLinearVelocity(fx * allPlanets[j].body:getMass() * 10, fy * allPlanets[j].body:getMass() * 10) -- (fx (number), y (number))
+                --ball.body:applyLinearImpulse(fx, fy) -- (fx (number), iy (number))
             end
         end
+        ball.body:setLinearVelocity(xv, yv)
+        allBullets[i] = ball
+        --allBullets[i].x, allBullets[i].y = ball.body:getPosition()
+        --allBullets[i].vx, allBullets[i].vy = ball.body:getLinearVelocity()
     end 
 end
 
